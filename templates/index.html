@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARIA-7</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #050510;
+            color: #e0e0ff;
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kontener {
+            width: 700px;
+            height: 90vh;
+            background: #0a0a20;
+            border: 1px solid #00ff8844;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 40px #00ff8822;
+        }
+
+        .naglowek {
+            background: #0d0d2a;
+            padding: 16px 24px;
+            border-bottom: 1px solid #00ff8833;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: puls 1.5s infinite;
+        }
+
+        @keyframes puls {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .naglowek h1 {
+            font-size: 1rem;
+            color: #00ff88;
+            letter-spacing: 3px;
+        }
+
+        .naglowek span {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        .okno-rozmowy {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .okno-rozmowy::-webkit-scrollbar { width: 4px; }
+        .okno-rozmowy::-webkit-scrollbar-thumb { background: #00ff8844; border-radius: 2px; }
+
+        .wiadomosc {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            animation: pojawienie 0.3s ease;
+        }
+
+        @keyframes pojawienie {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wiadomosc.uzytkownik { align-self: flex-end; align-items: flex-end; }
+        .wiadomosc.aria { align-self: flex-start; align-items: flex-start; }
+
+        .etykieta {
+            font-size: 0.7rem;
+            color: #555;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+
+        .wiadomosc.uzytkownik .etykieta { color: #4488ff88; }
+        .wiadomosc.aria .etykieta { color: #00ff8888; }
+
+        .babelek {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .wiadomosc.uzytkownik .babelek {
+            background: #1a2a4a;
+            border: 1px solid #4488ff33;
+            color: #aaccff;
+        }
+
+        .wiadomosc.aria .babelek {
+            background: #0a2a1a;
+            border: 1px solid #00ff8833;
+            color: #aaffcc;
+        }
+
+        .pisanie {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #0a2a1a;
+            border: 1px solid #00ff8833;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .pisanie span {
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: skakanie 1s infinite;
+        }
+
+        .pisanie span:nth-child(2) { animation-delay: 0.2s; }
+        .pisanie span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes skakanie {
+            0%, 100% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        .dolna-czesc {
+            padding: 16px;
+            background: #0d0d2a;
+            border-top: 1px solid #00ff8833;
+            display: flex;
+            gap: 10px;
+        }
+
+        .pole-tekstowe {
+            flex: 1;
+            background: #0a0a20;
+            border: 1px solid #00ff8844;
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #e0e0ff;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .pole-tekstowe:focus { border-color: #00ff88; }
+        .pole-tekstowe::placeholder { color: #334; }
+
+        .przycisk-wyslij {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .przycisk-wyslij:hover { background: #00cc66; transform: scale(1.05); }
+        .przycisk-wyslij:disabled { background: #334; cursor: not-allowed; transform: none; }
+    </style>
+</head>
+<body>
+
+<div class="kontener">
+    <div class="naglowek">
+        <div class="status-dot"></div>
+        <h1>ARIA-7 // ONLINE</h1>
+        <span>ROK 2157</span>
+    </div>
+
+    <div class="okno-rozmowy" id="oknoRozmowy">
+        <div class="wiadomosc aria">
+            <div class="etykieta">ARIA-7</div>
+            <div class="babelek">Inicjalizacja protokołów komunikacyjnych ukończona. Witaj, użytkowniku. Jestem ARIA-7. Jak mogę przetworzyć Twoje zapytanie?</div>
+        </div>
+    </div>
+
+    <div class="dolna-czesc">
+        <input
+            type="text"
+            class="pole-tekstowe"
+            id="poleTekstowe"
+            placeholder="Wprowadź zapytanie do strumienia danych..."
+        />
+        <button class="przycisk-wyslij" id="przyciskWyslij" onclick="wyslij()">
+            WYŚLIJ ▶
+        </button>
+    </div>
+</div>
+
+<script>
+    const poleTekstowe = document.getElementById("poleTekstowe");
+    const przycisk = document.getElementById("przyciskWyslij");
+    const okno = document.getElementById("oknoRozmowy");
+
+    // Enter wysyła wiadomość
+    poleTekstowe.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") wyslij();
+    });
+
+    function dodajWiadomosc(tekst, kto) {
+        const div = document.createElement("div");
+        div.className = `wiadomosc ${kto}`;
+        div.innerHTML = `
+            <div class="etykieta">${kto === "uzytkownik" ? "TY" : "ARIA-7"}</div>
+            <div class="babelek">${tekst}</div>
+        `;
+        okno.appendChild(div);
+        okno.scrollTop = okno.scrollHeight;
+    }
+
+    function pokazPisanie() {
+        const div = document.createElement("div");
+        div.className = "wiadomosc aria";
+        div.id = "pisanie";
+        div.innerHTML = `
+            <div class="etykieta">ARIA-7</div>
+            <div class="pisanie">
+                <span></span><span></span><span></span>
+            </div>
+        `;
+        okno.appendChild(div);
+        okno.scrollTop = okno.scrollHeight;
+    }
+
+    function ukryPisanie() {
+        const el = document.getElementById("pisanie");
+        if (el) el.remove();
+    }
+
+    async function wyslij() {
+        const pytanie = poleTekstowe.value.trim();
+        if (!pytanie) return;
+
+        dodajWiadomosc(pytanie, "uzytkownik");
+        poleTekstowe.value = "";
+        przycisk.disabled = true;
+        pokazPisanie();
+
+        try {
+            const odpowiedz = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pytanie: pytanie })
+            });
+
+            const dane = await odpowiedz.json();
+            ukryPisanie();
+            dodajWiadomosc(dane.odpowiedz, "aria");
+        } catch (err) {
+            ukryPisanie();
+            dodajWiadomosc("Błąd połączenia ze strumieniem danych...", "aria");
+        }
+
+        przycisk.disabled = false;
+        poleTekstowe.focus();
+    }
+</script>
+
+</body>
+</html>
